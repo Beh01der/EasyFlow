@@ -6,10 +6,6 @@ import com.google.common.collect.Sets;
 import java.util.Map;
 import java.util.Set;
 
-// TODO may be check additionally: 
-// 1. every event and state have unique name
-// 2. every event and state utilised in FSM
-// 3. every callback assigned only once
 public class LogicValidator <C extends StatefulContext> {
 	private State<C> startState;
 	private Set<Event<C>> events; 
