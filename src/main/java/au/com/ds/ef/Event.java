@@ -4,10 +4,10 @@ import au.com.ds.ef.call.EventHandler;
 import au.com.ds.ef.err.DefinitionError;
 import au.com.ds.ef.err.ExecutionError;
 import au.com.ds.ef.err.LogicViolationError;
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Event<C extends StatefulContext> {
@@ -15,7 +15,7 @@ public class Event<C extends StatefulContext> {
 	private static Logger log = LoggerFactory.getLogger(Event.class);
 	
 	private String id;
-    private Map<State<C>, State<C>> transitions = Maps.newHashMap();
+    private Map<State<C>, State<C>> transitions = new HashMap<State<C>, State<C>>();
 	private EasyFlow<C> runner;
 
 	private EventHandler<C> onTriggeredHandler;

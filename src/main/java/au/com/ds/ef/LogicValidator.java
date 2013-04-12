@@ -1,8 +1,8 @@
 package au.com.ds.ef;
 
 import au.com.ds.ef.err.DefinitionError;
-import com.google.common.collect.Sets;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,8 +13,8 @@ public class LogicValidator <C extends StatefulContext> {
 	
 	public LogicValidator(State<C> startState) {
 		this.startState = startState;
-		events = Sets.newHashSet();
-		states = Sets.newHashSet();
+		events = new HashSet<Event<C>>();
+		states = new HashSet<State<C>>();
 	}
 	
 	public void validate() {

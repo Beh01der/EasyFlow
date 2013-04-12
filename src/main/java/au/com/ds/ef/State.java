@@ -2,10 +2,10 @@ package au.com.ds.ef;
 
 import au.com.ds.ef.call.StateHandler;
 import au.com.ds.ef.err.ExecutionError;
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class State<C extends StatefulContext> {
@@ -15,7 +15,7 @@ public class State<C extends StatefulContext> {
 	private boolean isFinal = false;
 	private EasyFlow<C> runner;
 	private String id;
-	private Map<Event<C>, State<C>> transitions = Maps.newHashMap();
+	private Map<Event<C>, State<C>> transitions = new HashMap<Event<C>, State<C>>();
 	private StateHandler<C> onEnterHandler;
 	private StateHandler<C> onLeaveHandler;
 	
