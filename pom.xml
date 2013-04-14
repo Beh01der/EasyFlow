@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>au.com.ds.ef</groupId>
 	<artifactId>EasyFlow</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.1</version>
 	<packaging>jar</packaging>
 	<name>EasyFlow</name>
 	<description>EasyFlow - Simple and lightweight Finite State Machine</description>
