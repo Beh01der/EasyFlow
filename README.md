@@ -11,8 +11,7 @@ With **EasyFlow** you can:
 * simplify design, programming and testing of complex java applications
 
 All this in less then 30kB and no run-time overhead!
-
-[Learn more](https://github.com/Beh01der/EasyFlow/wiki) about **EasyFlow** or just [Download it] (https://github.com/Beh01der/EasyFlow/wiki/Downloads)
+[Download EasyFlow 1.1](http://datasymphony.com.au/?wpdmact=process&did=MS5ob3RsaW5r)
 
 Here is a simple example illustrating how a state machine can be definded and implemented with **EasyFlow**
 
