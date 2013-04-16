@@ -1,5 +1,6 @@
 EasyFlow
 ========
+by [DataSymphony.com.au](http://datasymphony.com.au/)
 
 EasyFlow is a simple and lightweight Finite State Machine for Java
 
