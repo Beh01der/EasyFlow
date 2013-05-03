@@ -9,7 +9,7 @@ import java.util.concurrent.Executor;
 
 
 public class EasyFlow<C extends StatefulContext> {
-    private static Logger log = LoggerFactory.getLogger(EasyFlow.class);
+    static Logger log = LoggerFactory.getLogger(EasyFlow.class);
     protected State<C> startState;
     private C context;
     private Executor executor;
@@ -63,7 +63,6 @@ public class EasyFlow<C extends StatefulContext> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected void setCurrentState(final State<C> state, final C context) {
         execute(new Runnable() {
             @Override
@@ -176,11 +175,7 @@ public class EasyFlow<C extends StatefulContext> {
                     log.debug("when final state {} for {} >>>", state, context);
             }
 
-            synchronized (context) {
-                callOnTerminate(context);
-                context.notifyAll();
-            }
-
+            callOnTerminate(context);
         } catch (Exception e) {
             callOnError(new ExecutionError(state, null, e,
                 "Execution Error in [EasyFlow.whenFinalState] handler", context));
@@ -202,13 +197,7 @@ public class EasyFlow<C extends StatefulContext> {
     }
 
     public void waitForCompletion(C context) {
-        try {
-            synchronized (context) {
-                context.wait();
-            }
-        } catch (InterruptedException e) {
-            log.error("Error", e);
-        }
+      context.awaitTermination();
     }
 
     public EasyFlow<C> executor(Executor executor) {
@@ -229,11 +218,7 @@ public class EasyFlow<C extends StatefulContext> {
         if (onError != null) {
             onError.call(error);
         }
-
-        synchronized (error.getContext()) {
-            callOnTerminate((C) error.getContext());
-            error.getContext().notifyAll();
-        }
+        callOnTerminate((C) error.getContext());
     }
 
     protected void callOnTerminate(final C context) {
