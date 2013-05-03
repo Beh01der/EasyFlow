@@ -1,6 +1,7 @@
 package au.com.ds.ef;
 
 import java.io.Serializable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings("rawtypes")
@@ -8,9 +9,10 @@ public class StatefulContext implements Serializable {
 	private static final long serialVersionUID = 2324535129909715649L;
 	private static long idCounter = 1;
 	
-	private String id;
+	private final String id;
 	private State state;
-	private AtomicBoolean terminated = new AtomicBoolean(false);
+	private final AtomicBoolean terminated = new AtomicBoolean(false);
+	private final CountDownLatch completionLatch = new CountDownLatch(1);
 
 	public StatefulContext() {
 		id = newId() + ":" + getClass().getSimpleName();
@@ -69,8 +71,21 @@ public class StatefulContext implements Serializable {
 
 	protected void setTerminated() {
 		this.terminated.set(true);
+		this.completionLatch.countDown();
 	}
 
+	/**
+	 * Block current thread until Context terminated
+	 */
+	protected void awaitTermination() {
+	  try {
+      this.completionLatch.await();
+    } 
+	  catch (InterruptedException e) {
+	    Thread.interrupted();
+	  }
+	}
+	
     @Override
     public String toString() {
         return id;
