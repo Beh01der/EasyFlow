@@ -58,3 +58,5 @@ and start the flow
 flow.start(new FlowContext());
 ```
 See the [complete example](https://github.com/Beh01der/EasyFlow-example-AtmEmulator/blob/master/src/au/com/ds/ef/ae/AtmEmulator/MainActivity.java)
+
+License [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
