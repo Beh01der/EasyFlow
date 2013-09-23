@@ -14,6 +14,7 @@ public class EasyFlow<C extends StatefulContext> {
     private C context;
     private Executor executor;
     private boolean validated;
+    private boolean skipValidation = false;
 
     private StateHandler<C> onStateEnterHandler;
     private StateHandler<C> onStateLeaveHandler;
@@ -46,8 +47,10 @@ public class EasyFlow<C extends StatefulContext> {
         if (!validated) {
             prepare();
 
-            LogicValidator<C> validator = new LogicValidator<C>(startState);
-            validator.validate();
+            if (!skipValidation) {
+                LogicValidator<C> validator = new LogicValidator<C>(startState);
+                validator.validate();
+            }
             validated = true;
         }
 
@@ -207,6 +210,11 @@ public class EasyFlow<C extends StatefulContext> {
 
     public EasyFlow<C> trace() {
         trace = true;
+        return this;
+    }
+
+    public EasyFlow<C> skipValidation() {
+        skipValidation = true;
         return this;
     }
 

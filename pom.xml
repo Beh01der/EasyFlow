@@ -1,12 +1,35 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>au.com.ds.ef</groupId>
+	<groupId>au.com.datasymphony.ef</groupId>
 	<artifactId>EasyFlow</artifactId>
 	<version>1.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>EasyFlow</name>
 	<description>EasyFlow - Simple and lightweight Finite State Machine</description>
+    <url>http://datasymphony.com.au/open-source/easyflow</url>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://github.com/Beh01der/EasyFlow</url>
+        <connection>scm:git:git://github.com/Beh01der/EasyFlow.git</connection>
+    </scm>
+    <developers>
+        <developer>
+            <id>andrey</id>
+            <name>Andrey Chausenko</name>
+            <email>andrey@datasymphony.com.au</email>
+            <url>http://datasymphony.com.au</url>
+            <organization>DataSymphony</organization>
+            <organizationUrl>http://datasymphony.com.au</organizationUrl>
+        </developer>
+    </developers>
 
 	<build>
 		<plugins>

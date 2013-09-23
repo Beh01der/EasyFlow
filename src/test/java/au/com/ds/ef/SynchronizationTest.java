@@ -51,7 +51,7 @@ public class SynchronizationTest {
 
       this.flow = FlowBuilder.from(uninitialized)
           .transit(onInitialize.to(running).transit(onTerminate.finish(done)));
-      this.flow.executor(new SyncExecutor());
+//      this.flow.executor(new SyncExecutor());
       
       flow.whenFinalState(new StateHandler<StatefulContext>() {
         @Override
@@ -76,6 +76,9 @@ public class SynchronizationTest {
     @Override
     public void run() {
       flow.validate().trace().start(new StatefulContext());
+//      This is not required when using SyncExecutor
+//      By the time we get here, flow is already completed
+//      SyncExecutor runs on the same thread on which "start" is called
       flow.waitForCompletion();
       System.out.println("Run method completed");
     }
