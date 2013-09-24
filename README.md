@@ -59,4 +59,13 @@ flow.start(new FlowContext());
 ```
 See the [complete example](https://github.com/Beh01der/EasyFlow-example-AtmEmulator/blob/master/src/au/com/ds/ef/ae/AtmEmulator/MainActivity.java)
 
+To start using EasyFlow on your project, define Maven dependency like so
+```xml
+<dependency>
+    <groupId>au.com.datasymphony</groupId>
+    <artifactId>EasyFlow</artifactId>
+    <version>1.2</version>
+</dependency>
+```
+
 License [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
