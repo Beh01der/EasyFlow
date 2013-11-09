@@ -17,6 +17,7 @@ public class Event<C extends StatefulContext> {
 	private String id;
     private Map<State<C>, State<C>> transitions = new HashMap<State<C>, State<C>>();
 	private EasyFlow<C> runner;
+    private boolean ignoreOutOfState = false;
 
 	private EventHandler<C> onTriggeredHandler;
 
@@ -41,8 +42,13 @@ public class Event<C extends StatefulContext> {
         onTriggeredHandler = onTriggered;
 		return this;
 	}
-	
-	public void trigger(final C context) {
+
+    public Event<C> ignoreOutOfState() {
+        ignoreOutOfState = true;
+        return this;
+    }
+
+    public void trigger(final C context) {
         if (runner.isTrace())
 		    log.debug("trigger {} for {}", this, context);
 
@@ -58,8 +64,9 @@ public class Event<C extends StatefulContext> {
 
 				try {
                     if (stateTo == null) {
-                        throw new LogicViolationError("Invalid Event: " + Event.this.toString() +
-                            " triggered while in State: " + context.getState() + " for " + context);
+                        if (!ignoreOutOfState)
+                            throw new LogicViolationError("Invalid Event: " + Event.this.toString() +
+                                " triggered while in State: " + context.getState() + " for " + context);
                     } else {
                         callOnTriggered(context, stateFrom, stateTo);
                         runner.callOnEventTriggered(Event.this, stateFrom, stateTo, context);
