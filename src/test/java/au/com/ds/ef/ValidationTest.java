@@ -1,150 +1,107 @@
 package au.com.ds.ef;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import au.com.ds.ef.err.DefinitionError;
+import au.com.ds.ef.err.*;
+import org.junit.*;
+import static au.com.ds.ef.ValidationTest.Events.*;
+import static au.com.ds.ef.ValidationTest.States.*;
+import static au.com.ds.ef.FlowBuilder.*;
 
 public class ValidationTest {
-	private State<StatefulContext> START;
-	private State<StatefulContext> STATE_1;
-	private State<StatefulContext> STATE_2;
-	private State<StatefulContext> STATE_3;
-	private State<StatefulContext> STATE_4;
-	
-	private Event<StatefulContext> onEvent_1;
-	private Event<StatefulContext> onEvent_2;
-	private Event<StatefulContext> onEvent_3;
-	private Event<StatefulContext> onEvent_4;
-	private Event<StatefulContext> onEvent_5;
-	private Event<StatefulContext> onEvent_6;
-	
-	@Before
-	public void setUp() {
-		START = FlowBuilder.state("START");
-		STATE_1 = FlowBuilder.state("STATE_1");
-		STATE_2 = FlowBuilder.state("STATE_2");
-		STATE_3 = FlowBuilder.state("STATE_3");
-		STATE_4 = FlowBuilder.state("STATE_4");
-		
-		onEvent_1 = FlowBuilder.event("onEvent_1");
-		onEvent_2 = FlowBuilder.event("onEvent_2");
-		onEvent_3 = FlowBuilder.event("onEvent_3");
-		onEvent_4 = FlowBuilder.event("onEvent_4");
-		onEvent_5 = FlowBuilder.event("onEvent_5");
-		onEvent_6 = FlowBuilder.event("onEvent_6");
-	}
-	
+	public enum States implements StateEnum {
+        START, STATE_1, STATE_2, STATE_3, STATE_4
+    }
+
+    public enum Events implements EventEnum {
+        event_1, event_2, event_3, event_4, event_5, event_6
+    }
+
 	@Test(expected = DefinitionError.class)
+    // no transitions defined
 	public void testLooseEnd1() {
-		EasyFlow<StatefulContext> flow =
-				
-		FlowBuilder.from(START).transit();
-		
-		flow.validate();
+		from(START).transit();
 	}
 	
 	@Test(expected = DefinitionError.class)
+    // no transitions defined for non-final state
 	public void testLooseEnd2() {
-		EasyFlow<StatefulContext> flow =
-				
-		FlowBuilder.from(START).transit(
-				onEvent_1.to(STATE_1)
+		from(START).transit(
+			on(event_1).to(STATE_1)
 		);
-		
-		flow.validate();
 	}
 	
 	@Test(expected = DefinitionError.class)
+    // no transitions defined for non-final state
 	public void testLooseEnd3() {
-		EasyFlow<StatefulContext> flow =
-		
-		FlowBuilder.from(START).transit(
-				onEvent_1.to(STATE_1).transit()
+		from(START).transit(
+			on(event_1).to(STATE_1).transit()
 		);
-		
-		flow.validate();
 	}
 	
 	@Test(expected = DefinitionError.class)
-	public void testUnreachableEvent() {
-		EasyFlow<StatefulContext> flow =
-				
-		FlowBuilder.from(START).transit(
-				onEvent_1.finish(STATE_1).transit(
-						onEvent_2.to(STATE_2)
-				)
+    // transition defined for final state
+	public void testRedundantEvent() {
+		from(START).transit(
+			on(event_1).finish(STATE_1).transit(
+				on(event_2).to(STATE_2)
+			)
 		);
-		
-		flow.validate();
 	}
 	
 	@Test
 	public void testReuseEvent() {
-		EasyFlow<StatefulContext> flow =
-				
-		FlowBuilder.from(START).transit(
-				onEvent_1.to(STATE_1).transit(
-						onEvent_1.to(STATE_2).transit(
-                            onEvent_1.finish(STATE_3)
-                        )
-				)
+		from(START).transit(
+			on(event_1).to(STATE_1).transit(
+				on(event_1).to(STATE_2).transit(
+                    on(event_1).finish(STATE_3)
+                )
+			)
 		);
-		
-		flow.validate();
 	}
 
 	@Test(expected = DefinitionError.class)
 	public void testAmbiguousEvent() {
-		EasyFlow<StatefulContext> flow =
-
-		FlowBuilder.from(START).transit(
-			onEvent_1.to(STATE_1),
-            onEvent_1.to(STATE_2)
+		from(START).transit(
+			on(event_1).to(STATE_1).transit(
+                on(event_2).finish(STATE_3)
+            ),
+            on(event_1).to(STATE_2).transit(
+                on(event_3).finish(STATE_3)
+            )
 		);
-
-		flow.validate();
 	}
 
 	@Test(expected = DefinitionError.class)
 	public void testDuplicateEvent() {
-		EasyFlow<StatefulContext> flow =
-
-		FlowBuilder.from(START).transit(
-			onEvent_1.to(STATE_1),
-            onEvent_1.to(STATE_1)
+		from(START).transit(
+			on(event_1).to(STATE_1).transit(
+                on(event_2).finish(STATE_2)
+            ),
+            on(event_1).to(STATE_1).transit(
+                on(event_3).finish(STATE_3)
+            )
 		);
-
-		flow.validate();
 	}
 
 	@Test(expected = DefinitionError.class)
 	public void testCircularEvent() {
-		EasyFlow<StatefulContext> flow =
-		
-		FlowBuilder.from(START).transit(
-				onEvent_1.to(START)
+		from(START).transit(
+			on(event_1).to(START),
+            on(event_2).finish(STATE_2)
 		);
-		
-		flow.validate();
 	}
 	
 	@Test
 	public void testValid() {
-		EasyFlow<StatefulContext> flow =
-			
-		FlowBuilder.from(START).transit(
-				onEvent_1.to(STATE_1).transit(
-						onEvent_3.to(STATE_2),
-						onEvent_6.finish(STATE_4)
+		from(START).transit(
+			on(event_1).to(STATE_1).transit(
+				on(event_3).to(STATE_2),
+				    on(event_6).finish(STATE_4)
 				),
-				onEvent_2.to(STATE_2).transit(
-						onEvent_4.to(STATE_3).transit(
-								onEvent_5.to(START)
-						)
+				on(event_2).to(STATE_2).transit(
+					on(event_4).to(STATE_3).transit(
+						on(event_5).to(START)
+					)
 				)
 		);
-		
-		flow.validate();
 	}
 }

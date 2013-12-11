@@ -1,16 +1,17 @@
 package au.com.ds.ef;
 
-import java.io.Serializable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.io.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 
 @SuppressWarnings("rawtypes")
 public class StatefulContext implements Serializable {
 	private static final long serialVersionUID = 2324535129909715649L;
-	private static long idCounter = 1;
+	private static volatile long idCounter = 1;
 	
 	private final String id;
-	private State state;
+    private EasyFlow flow;
+	private StateEnum state;
 	private final AtomicBoolean terminated = new AtomicBoolean(false);
 	private final CountDownLatch completionLatch = new CountDownLatch(1);
 
@@ -26,11 +27,11 @@ public class StatefulContext implements Serializable {
 		return id;
 	}
 	
-	public void setState(State state){
+	public void setState(StateEnum state){
 		this.state = state;
 	}
 	
-	public State getState() {
+	public StateEnum getState() {
 		return state;
 	}
 
@@ -52,6 +53,14 @@ public class StatefulContext implements Serializable {
 			return false;
 		return true;
 	}
+
+    public void trigger(EventEnum event) {
+        flow.trigger(this, event);
+    }
+
+    protected void setFlow(EasyFlow<? extends StatefulContext> flow) {
+        this.flow = flow;
+    }
 	
 	protected long newId() {
 		return idCounter++;

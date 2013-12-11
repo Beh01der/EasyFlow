@@ -1,42 +1,46 @@
 package au.com.ds.ef;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class FlowBuilder<C extends StatefulContext> {
-    private static final Logger log = LoggerFactory.getLogger(FlowBuilder.class);
-	private State<C> startState;
-	
-	protected FlowBuilder(State<C> startState) {
-		this.startState = startState;
+	private EasyFlow<C> flow;
+
+    public static class ToHolder {
+        private EventEnum event;
+
+        private ToHolder(EventEnum event) {
+            this.event = event;
+        }
+
+        public Transition to(StateEnum state) {
+            return new Transition(event, state, false);
+        }
+
+        public Transition finish(StateEnum state) {
+            return new Transition(event, state, true);
+        }
+    }
+
+	private FlowBuilder(StateEnum startState) {
+        flow = new EasyFlow<C>(startState);
 	}
-	
-	public static <C extends StatefulContext> FlowBuilder<C> from(State<C> startState) {
+
+	public static <C extends StatefulContext> FlowBuilder<C> from(StateEnum startState) {
 		return new FlowBuilder<C>(startState);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public EasyFlow<C> transit(TransitionBuilder... transitions) {
-        for (TransitionBuilder<C> transition : transitions) {
-            transition.getEvent().addTransition(startState, transition.getStateTo());
-        }
+    public static ToHolder on(EventEnum event) {
+        return new ToHolder(event);
+    }
 
-		return new EasyFlow<C>(startState, transitions);
-	}
-	
-	public static <C extends StatefulContext> Event<C> event(String name) {
-		return new Event<C>(name);
-	}
-	
-	public static <C extends StatefulContext> Event<C> event() {
-		return new Event<C>();
-	}
-	
-	public static <C extends StatefulContext> State<C> state(String name) {
-		return new State<C>(name);
-	}
-	
-	public static <C extends StatefulContext> State<C> state() {
-		return new State<C>();
+    public <C1 extends StatefulContext> EasyFlow<C1> transit(Transition... transitions) {
+        return transit(false, transitions);
+    }
+
+	public <C1 extends StatefulContext> EasyFlow<C1> transit(boolean skipValidation, Transition... transitions) {
+        for (Transition transition : transitions) {
+            transition.setStateFrom(flow.getStartState());
+        }
+		flow.processAllTransitions(skipValidation);
+
+        return (EasyFlow<C1>) flow;
 	}
 }

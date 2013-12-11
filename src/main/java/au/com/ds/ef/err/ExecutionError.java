@@ -1,17 +1,14 @@
 package au.com.ds.ef.err;
 
-import au.com.ds.ef.Event;
-import au.com.ds.ef.State;
-import au.com.ds.ef.StatefulContext;
+import au.com.ds.ef.*;
 
-@SuppressWarnings("rawtypes")
 public class ExecutionError extends Exception {
 	private static final long serialVersionUID = 4362053831847081229L;
-	private State state;
-	private Event event;
+	private StateEnum state;
+	private EventEnum event;
 	private StatefulContext context;
 	
-	public ExecutionError(State state, Event event, Exception error, String message, StatefulContext context) {
+	public ExecutionError(StateEnum state, EventEnum event, Exception error, String message, StatefulContext context) {
 		super(message, error);
 		
 		this.state = state;
@@ -19,15 +16,15 @@ public class ExecutionError extends Exception {
 		this.context = context;
 	}
 
-	public State getState() {
+	public StateEnum getState() {
 		return state;
 	}
 
-	public Event getEvent() {
+	public EventEnum getEvent() {
 		return event;
 	}
 
-	public StatefulContext getContext() {
-		return context;
+	public <C extends StatefulContext> C getContext() {
+		return (C) context;
 	}
 }

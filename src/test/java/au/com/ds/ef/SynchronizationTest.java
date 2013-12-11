@@ -1,98 +1,109 @@
 package au.com.ds.ef;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 
-import au.com.ds.ef.call.StateHandler;
+import au.com.ds.ef.call.*;
+import sun.management.resources.*;
+
+import static au.com.ds.ef.SynchronizationTest.Events.*;
+import static au.com.ds.ef.SynchronizationTest.States.*;
+import static au.com.ds.ef.FlowBuilder.*;
 
 /**
  * With original synchronize()/notifyAll() approach this test never finishes
  * (thread(s) still waiting on notification)
  */
 public class SynchronizationTest {
-  void doRun() {
-    ExecutorService threadPool = Executors.newCachedThreadPool();
-    for(int i = 0; i < 5; i++) {
-      Node n = new Node();
-      threadPool.execute(n);
+    private static final int THREAD_NUM = 5;
+
+    public enum Events implements EventEnum {
+        initialize, terminate
     }
-    threadPool.shutdown();
-  }
 
-  public static void main(String[] args) {
-    new SynchronizationTest().doRun();
-  }
-  
-  static class Node implements Runnable {
-    final Event<StatefulContext> onInitialize = FlowBuilder.event("onInitialize");
-    final Event<StatefulContext> onTerminate = FlowBuilder.event("onTerminate");
+    public enum States implements StateEnum {
+        UNINITIALIZED,
+        RUNNING,
+        DONE
+    }
 
-    final EasyFlow<StatefulContext> flow;
-    
-    Node() {
-      final State<StatefulContext> uninitialized = FlowBuilder.state("unitialized");
-      final State<StatefulContext> running = FlowBuilder.state("running");
-      final State<StatefulContext> done = FlowBuilder.state("done");
-
-      uninitialized.whenEnter(new StateHandler<StatefulContext>() {
-        @Override
-        public void call(State<StatefulContext> state, StatefulContext context) throws Exception {
-          System.out.println(getThreadName()+" unitialized:Enter");
-          unitializedEnter(state, context);
+    void doRun() throws InterruptedException {
+        ExecutorService threadPool = Executors.newFixedThreadPool(THREAD_NUM);
+        for (int i = 0; i < THREAD_NUM; i++) {
+            Node n = new Node(threadPool);
+            threadPool.submit(n);
         }
-      });
-      running.whenEnter(new StateHandler<StatefulContext>() {
-        @Override
-        public void call(State<StatefulContext> state, StatefulContext context) throws Exception {
-          System.out.println(getThreadName()+" runnig:Enter");
-          runningEnter(state, context);
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        new SynchronizationTest().doRun();
+    }
+
+    static class Node implements Runnable {
+        private static AtomicInteger runningInstances = new AtomicInteger(THREAD_NUM);
+        final EasyFlow<StatefulContext> flow;
+        ExecutorService executor;
+
+        Node(ExecutorService executor) {
+            this.executor = executor;
+
+            flow =
+
+                from(UNINITIALIZED).transit(
+                    on(initialize).to(RUNNING).transit(
+                        on(terminate).finish(DONE)
+                    )
+                );
+
+            flow
+                .whenEnter(UNINITIALIZED, new ContextHandler<StatefulContext>() {
+                    @Override
+                    public void call(StatefulContext context) throws Exception {
+                        System.out.println(getThreadName() + " unitialized:Enter");
+                        context.trigger(initialize);
+                    }
+                })
+
+                .whenEnter(RUNNING, new ContextHandler<StatefulContext>() {
+                    @Override
+                    public void call(StatefulContext context) throws Exception {
+                        System.out.println(getThreadName() + " runnig:Enter");
+                        for (int i = 0; i < 10; i++) {
+                            System.out.println(getThreadName() + " running");
+                            Thread.sleep(1000);
+                        }
+                        context.trigger(terminate);
+                    }
+                })
+
+                .whenFinalState(new StateHandler<StatefulContext>() {
+                    @Override
+                    public void call(StateEnum state, StatefulContext context) throws Exception {
+                        System.out.println(getThreadName() + " final");
+                    }
+                });
         }
-      });
 
-      this.flow = FlowBuilder.from(uninitialized)
-          .transit(onInitialize.to(running).transit(onTerminate.finish(done)));
-//      this.flow.executor(new SyncExecutor());
-      
-      flow.whenFinalState(new StateHandler<StatefulContext>() {
         @Override
-        public void call(State<StatefulContext> state, StatefulContext context) throws Exception {
-          System.out.println(getThreadName()+" final");
-        }
-      });
-    }
+        public void run() {
+            StatefulContext ctx = new StatefulContext();
 
-    void unitializedEnter(State<StatefulContext> state, StatefulContext context) {
-      onInitialize.trigger(context);
-    }
-
-    void runningEnter(State<StatefulContext> state, StatefulContext context) {
-      for(int i = 0; i < 10; i++) {
-        System.out.println(getThreadName()+" running");
-        sleep(1000);
-      }
-      onTerminate.trigger(context);
-    }
-    
-    @Override
-    public void run() {
-      flow.validate().trace().start(new StatefulContext());
+            flow.start(ctx);
 //      This is not required when using SyncExecutor
 //      By the time we get here, flow is already completed
 //      SyncExecutor runs on the same thread on which "start" is called
-      flow.waitForCompletion();
-      System.out.println("Run method completed");
+            ctx.awaitTermination();
+            System.out.println("Run method completed");
+
+            if (runningInstances.decrementAndGet() == 0) {
+                System.out.println("All threads completed");
+                executor.shutdownNow();
+                System.exit(0);
+            }
+        }
     }
-  }
-  
-  static String getThreadName() {
-    return Thread.currentThread().getName();
-  }
-  
-  static void sleep(long ms) {
-    try {
-      Thread.sleep(ms);
-    } catch (InterruptedException e) {
-      Thread.interrupted();
+
+    static String getThreadName() {
+        return Thread.currentThread().getName();
     }
-  }
 }

@@ -1,6 +1,7 @@
 package au.com.ds.ef;
 
-import au.com.ds.ef.call.StateHandler;
+import au.com.ds.ef.call.*;
+import au.com.ds.ef.err.*;
 import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +10,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static au.com.ds.ef.JsonArrayParserTest.Events.*;
+import static au.com.ds.ef.JsonArrayParserTest.States.*;
+import static au.com.ds.ef.FlowBuilder.*;
 
 /**
  * User: andrey
@@ -124,180 +128,186 @@ public class JsonArrayParserTest {
         }
     }
 
-    private final State<ParserContext> GETTING_CHAR = FlowBuilder.state();
-    private final State<ParserContext> DONE = FlowBuilder.state();
-    private final State<ParserContext> ERROR = FlowBuilder.state();
-    private final State<ParserContext> VALIDATING = FlowBuilder.state();
-    private final State<ParserContext> PROCESSING_CHAR = FlowBuilder.state();
-    private final State<ParserContext> STARTING_ARRAY = FlowBuilder.state();
-    private final State<ParserContext> ENDING_ARRAY = FlowBuilder.state();
-    private final State<ParserContext> STARTING_VALUE = FlowBuilder.state();
-    private final State<ParserContext> CONTINUING_VALUE = FlowBuilder.state();
-    private final State<ParserContext> ENDING_VALUE = FlowBuilder.state();
-    private final State<ParserContext> PROCESSING_SPACE = FlowBuilder.state();
+    public enum States implements StateEnum {
+        GETTING_CHAR,
+        DONE,
+        ERROR,
+        VALIDATING,
+        PROCESSING_CHAR,
+        STARTING_ARRAY,
+        ENDING_ARRAY,
+        STARTING_VALUE,
+        CONTINUING_VALUE,
+        ENDING_VALUE,
+        PROCESSING_SPACE
+    }
 
-    private final Event<ParserContext> onNoMoreChars = FlowBuilder.event();
-    private final Event<ParserContext> onNewChar = FlowBuilder.event();
-    private final Event<ParserContext> onArrayStart = FlowBuilder.event();
-    private final Event<ParserContext> onArrayEnd = FlowBuilder.event();
-    private final Event<ParserContext> onValueStart = FlowBuilder.event();
-    private final Event<ParserContext> onValueContinue = FlowBuilder.event();
-    private final Event<ParserContext> onValueEnd = FlowBuilder.event();
-    private final Event<ParserContext> onSpace = FlowBuilder.event();
-    private final Event<ParserContext> onUnexpectedChar = FlowBuilder.event();
-    private final Event<ParserContext> onCharProcessed = FlowBuilder.event();
-    private final Event<ParserContext> onContentValid = FlowBuilder.event();
-    private final Event<ParserContext> onContentInvalid = FlowBuilder.event();
+    public enum Events implements EventEnum {
+        noMoreChars,
+        newChar,
+        arrayStart,
+        arrayEnd,
+        valueStart,
+        valueContinue,
+        valueEnd,
+        space,
+        unexpectedChar,
+        charProcessed,
+        contentValid,
+        contentInvalid
+    }
 
     private EasyFlow<ParserContext> flow;
 
     @Before
     public void setUp() {
-        flow = FlowBuilder.
+        flow =
             from(GETTING_CHAR).transit(
-                onNewChar.to(PROCESSING_CHAR).transit(
-                    onArrayStart.to(STARTING_ARRAY).transit(
-                        onCharProcessed.to(GETTING_CHAR)
+                on(newChar).to(PROCESSING_CHAR).transit(
+                    on(arrayStart).to(STARTING_ARRAY).transit(
+                        on(charProcessed).to(GETTING_CHAR)
                     ),
-                    onArrayEnd.to(ENDING_ARRAY).transit(
-                        onCharProcessed.to(GETTING_CHAR),
-                        onUnexpectedChar.finish(ERROR)
+                    on(arrayEnd).to(ENDING_ARRAY).transit(
+                        on(charProcessed).to(GETTING_CHAR),
+                        on(unexpectedChar).finish(ERROR)
                     ),
-                    onValueStart.to(STARTING_VALUE).transit(
-                        onCharProcessed.to(GETTING_CHAR)
+                    on(valueStart).to(STARTING_VALUE).transit(
+                        on(charProcessed).to(GETTING_CHAR)
                     ),
-                    onValueContinue.to(CONTINUING_VALUE).transit(
-                        onCharProcessed.to(GETTING_CHAR)
+                    on(valueContinue).to(CONTINUING_VALUE).transit(
+                        on(charProcessed).to(GETTING_CHAR)
                     ),
-                    onValueEnd.to(ENDING_VALUE).transit(
-                        onCharProcessed.to(GETTING_CHAR)
+                    on(valueEnd).to(ENDING_VALUE).transit(
+                        on(charProcessed).to(GETTING_CHAR)
                     ),
-                    onSpace.to(PROCESSING_SPACE).transit(
-                        onCharProcessed.to(GETTING_CHAR)
+                    on(space).to(PROCESSING_SPACE).transit(
+                        on(charProcessed).to(GETTING_CHAR)
                     ),
-                    onUnexpectedChar.finish(ERROR)
+                    on(unexpectedChar).finish(ERROR)
                 ),
-                onNoMoreChars.to(VALIDATING).transit(
-                    onContentValid.finish(DONE),
-                    onContentInvalid.finish(ERROR)
+                on(noMoreChars).to(VALIDATING).transit(
+                    on(contentValid).finish(DONE),
+                    on(contentInvalid).finish(ERROR)
                 )
-        )
-        .executor(new SyncExecutor());
+            );
 
-        GETTING_CHAR.whenEnter(new StateHandler<ParserContext>() {
-            @Override
-            public void call(State<ParserContext> state, ParserContext context) throws Exception {
-                if (context.getNextChar() == 0) {
-                    onNoMoreChars.trigger(context);
-                } else {
-                    onNewChar.trigger(context);
+        flow
+            .executor(new SyncExecutor())
+
+            .whenEnter(GETTING_CHAR, new ContextHandler<ParserContext>() {
+                @Override
+                public void call(ParserContext context) throws Exception {
+                    if (context.getNextChar() == 0) {
+                        context.trigger(noMoreChars);
+                    } else {
+                        context.trigger(newChar);
+                    }
                 }
-            }
-        });
+            })
 
-        PROCESSING_CHAR.whenEnter(new StateHandler<ParserContext>() {
-            @Override
-            public void call(State<ParserContext> state, ParserContext context) throws Exception {
-                char c = context.getThisChar();
-                if (context.isStartedValue() && c != '\'') {
-                    onValueContinue.trigger(context);
-                    return;
+            .whenEnter(PROCESSING_CHAR, new ContextHandler<ParserContext>() {
+                @Override
+                public void call(ParserContext context) throws Exception {
+                    char c = context.getThisChar();
+                    if (context.isStartedValue() && c != '\'') {
+                        context.trigger(valueContinue);
+                        return;
+                    }
+
+                    switch (c) {
+                        case '[':
+                            context.trigger(arrayStart);
+                            break;
+                        case ']':
+                            context.trigger(arrayEnd);
+                            break;
+                        case '\'':
+                            if (context.isStartedValue()) {
+                                context.trigger(valueEnd);
+                            } else {
+                                context.trigger(valueStart);
+                            }
+                            break;
+                        case ' ':
+                        case ',':
+                            context.trigger(space);
+                            break;
+                        default:
+                            context.trigger(unexpectedChar);
+                    }
                 }
+            })
 
-                switch (c) {
-                    case '[':
-                        onArrayStart.trigger(context);
-                        break;
-                    case ']':
-                        onArrayEnd.trigger(context);
-                        break;
-                    case '\'':
-                        if (context.isStartedValue()) {
-                            onValueEnd.trigger(context);
-                        } else {
-                            onValueStart.trigger(context);
-                        }
-                        break;
-                    case ' ':
-                    case ',':
-                        onSpace.trigger(context);
-                        break;
-                    default:
-                        onUnexpectedChar.trigger(context);
+            .whenEnter(STARTING_ARRAY, new ContextHandler<ParserContext>() {
+                @Override
+                public void call(ParserContext context) throws Exception {
+                    context.pushStack();
+                    context.trigger(charProcessed);
                 }
-            }
-        });
+            })
 
-        STARTING_ARRAY.whenEnter(new StateHandler<ParserContext>() {
-            @Override
-            public void call(State<ParserContext> state, ParserContext context) throws Exception {
-                context.pushStack();
-                onCharProcessed.trigger(context);
-            }
-        });
-
-        ENDING_ARRAY.whenEnter(new StateHandler<ParserContext>() {
-            @Override
-            public void call(State<ParserContext> state, ParserContext context) throws Exception {
-                if (context.getStackLevel() > 0) {
-                    context.popStack();
-                    onCharProcessed.trigger(context);
-                } else {
-                    onUnexpectedChar.trigger(context);
+            .whenEnter(ENDING_ARRAY, new ContextHandler<ParserContext>() {
+                @Override
+                public void call(ParserContext context) throws Exception {
+                    if (context.getStackLevel() > 0) {
+                        context.popStack();
+                        context.trigger(charProcessed);
+                    } else {
+                        context.trigger(unexpectedChar);
+                    }
                 }
-            }
-        });
+            })
 
-        STARTING_VALUE.whenEnter(new StateHandler<ParserContext>() {
-            @Override
-            public void call(State<ParserContext> state, ParserContext context) throws Exception {
-                context.startValue();
-                onCharProcessed.trigger(context);
-            }
-        });
-
-        CONTINUING_VALUE.whenEnter(new StateHandler<ParserContext>() {
-            @Override
-            public void call(State<ParserContext> state, ParserContext context) throws Exception {
-                context.appendToValue();
-                onCharProcessed.trigger(context);
-            }
-        });
-
-        ENDING_VALUE.whenEnter(new StateHandler<ParserContext>() {
-            @Override
-            public void call(State<ParserContext> state, ParserContext context) throws Exception {
-                context.endValue();
-                onCharProcessed.trigger(context);
-            }
-        });
-
-        PROCESSING_SPACE.whenEnter(new StateHandler<ParserContext>() {
-            @Override
-            public void call(State<ParserContext> state, ParserContext context) throws Exception {
-                onCharProcessed.trigger(context);
-            }
-        });
-
-        VALIDATING.whenEnter(new StateHandler<ParserContext>() {
-            @Override
-            public void call(State<ParserContext> state, ParserContext context) throws Exception {
-                if (context.getStackLevel() != 0) {
-                    onContentInvalid.trigger(context);
-                } else if (context.isStartedValue()) {
-                    onContentInvalid.trigger(context);
-                } else {
-                    onContentValid.trigger(context);
+            .whenEnter(STARTING_VALUE, new ContextHandler<ParserContext>() {
+                @Override
+                public void call(ParserContext context) throws Exception {
+                    context.startValue();
+                    context.trigger(charProcessed);
                 }
-            }
-        });
+            })
 
-        ERROR.whenEnter(new StateHandler<ParserContext>() {
-            @Override
-            public void call(State<ParserContext> state, ParserContext context) throws Exception {
-                context.resetResult();
-            }
-        });
+            .whenEnter(CONTINUING_VALUE, new ContextHandler<ParserContext>() {
+                @Override
+                public void call(ParserContext context) throws Exception {
+                    context.appendToValue();
+                    context.trigger(charProcessed);
+                }
+            })
+
+            .whenEnter(ENDING_VALUE, new ContextHandler<ParserContext>() {
+                @Override
+                public void call(ParserContext context) throws Exception {
+                    context.endValue();
+                    context.trigger(charProcessed);
+                }
+            })
+
+            .whenEnter(PROCESSING_SPACE, new ContextHandler<ParserContext>() {
+                @Override
+                public void call(ParserContext context) throws Exception {
+                    context.trigger(charProcessed);
+                }
+            })
+
+            .whenEnter(VALIDATING, new ContextHandler<ParserContext>() {
+                @Override
+                public void call(ParserContext context) throws Exception {
+                    if (context.getStackLevel() != 0) {
+                        context.trigger(contentInvalid);
+                    } else if (context.isStartedValue()) {
+                        context.trigger(contentInvalid);
+                    } else {
+                        context.trigger(contentValid);
+                    }
+                }
+            })
+
+            .whenEnter(ERROR, new ContextHandler<ParserContext>() {
+                @Override
+                public void call(ParserContext context) throws Exception {
+                    context.resetResult();
+                }
+            });
     }
 
     @Test
