@@ -15,7 +15,6 @@ class HandlerCollection {
     public enum EventType {
         EVENT_TRIGGER,
         ANY_EVENT_TRIGGER,
-        ANY_EVENT_SIMPLE_TRIGGER,
         STATE_ENTER,
         ANY_STATE_ENTER,
         STATE_LEAVE,
@@ -64,17 +63,11 @@ class HandlerCollection {
         handlers.put(new HandlerType(eventType, event, state), handler);
     }
 
-    public <C extends StatefulContext> void callOnEventTriggered(C context, EventEnum event, StateEnum stateFrom, StateEnum stateTo) throws Exception {
+    public <C extends StatefulContext> void callOnEventTriggered(EventEnum event, StateEnum stateFrom, StateEnum stateTo, C context) throws Exception {
         Handler h = handlers.get(new HandlerType(EventType.EVENT_TRIGGER, event, null));
         if (h != null) {
             ContextHandler<C> contextHandler = (ContextHandler<C>) h;
             contextHandler.call(context);
-        }
-
-        h = handlers.get(new HandlerType(EventType.ANY_EVENT_SIMPLE_TRIGGER, null, null));
-        if (h != null) {
-            SimpleEventHandler<C> simpleEventHandler = (SimpleEventHandler<C>) h;
-            simpleEventHandler.call(event, context);
         }
 
         h = handlers.get(new HandlerType(EventType.ANY_EVENT_TRIGGER, null, null));
@@ -84,7 +77,7 @@ class HandlerCollection {
         }
     }
 
-    public <C extends StatefulContext> void callOnStateEntered(C context, StateEnum state) throws Exception {
+    public <C extends StatefulContext> void callOnStateEntered(StateEnum state, C context) throws Exception {
         Handler h = handlers.get(new HandlerType(EventType.STATE_ENTER, null, state));
         if (h != null) {
             ContextHandler<C> contextHandler = (ContextHandler<C>) h;
@@ -98,7 +91,7 @@ class HandlerCollection {
         }
     }
 
-    public <C extends StatefulContext> void callOnStateLeaved(C context, StateEnum state) throws Exception {
+    public <C extends StatefulContext> void callOnStateLeaved(StateEnum state, C context) throws Exception {
         Handler h = handlers.get(new HandlerType(EventType.STATE_LEAVE, null, state));
         if (h != null) {
             ContextHandler<C> contextHandler = (ContextHandler<C>) h;
@@ -112,7 +105,7 @@ class HandlerCollection {
         }
     }
 
-    public <C extends StatefulContext> void callOnFinalState(C context, StateEnum state) throws Exception {
+    public <C extends StatefulContext> void callOnFinalState(StateEnum state, C context) throws Exception {
         Handler h = handlers.get(new HandlerType(EventType.FINAL_STATE, null, null));
         if (h != null) {
             StateHandler<C> contextHandler = (StateHandler<C>) h;

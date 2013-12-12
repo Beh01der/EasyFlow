@@ -57,7 +57,7 @@ final class TransitionCollection {
                 StateEnum stateTo = transition.getStateTo();
                 if (!finalStates.contains(stateTo) &&
                         !transitionFromState.containsKey(stateTo)) {
-                    throw new DefinitionError("No events defined for non-final StateHolder: " + stateTo);
+                    throw new DefinitionError("No events defined for non-final State: " + stateTo);
                 }
 
                 if (stateFrom.equals(stateTo)) {

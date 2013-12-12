@@ -55,7 +55,7 @@ public class StatefulContext implements Serializable {
 	}
 
     public void trigger(EventEnum event) {
-        flow.trigger(this, event);
+        flow.trigger(event, this);
     }
 
     protected void setFlow(EasyFlow<? extends StatefulContext> flow) {
