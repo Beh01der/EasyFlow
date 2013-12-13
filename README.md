@@ -3,6 +3,7 @@ EasyFlow
 by [DataSymphony.com.au](http://datasymphony.com.au/)
 
 EasyFlow 1.3 is out (12 Dec 2013)
+* refactored to use Java **enums** for states and events
 
 EasyFlow is a simple and lightweight Finite State Machine for Java
 
@@ -25,6 +26,14 @@ This is a State diargam fragment describing a simple ATM workflow
 With **EasyFlow** we can define the above state machine like this
 
 ```java
+enum States implements StateEnum {
+    SHOWING_WELCOME, WAITING_FOR_PIN, RETURNING_CARD, SHOWING_WELCOME, ...
+}
+
+enum Events implements EventEnum {
+    cardPresent, pinProvided, cardExtracted, cancel, ...
+}
+...
 EasyFlow<FlowContext> flow =
 
     from(SHOWING_WELCOME).transit(
@@ -36,7 +45,7 @@ EasyFlow<FlowContext> flow =
                 on(cardExtracted).to(SHOWING_WELCOME)
             )
         )
-    )
+    );
 ```
 then all what's left to do is to implement our state handlers like so
 ```java
