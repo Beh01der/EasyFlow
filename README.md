@@ -2,6 +2,8 @@ EasyFlow
 ========
 by [DataSymphony.com.au](http://datasymphony.com.au/)
 
+EasyFlow 1.3 is out (12 Dec 2013)
+
 EasyFlow is a simple and lightweight Finite State Machine for Java
 
 With **EasyFlow** you can:
@@ -12,7 +14,7 @@ With **EasyFlow** you can:
 * simplify design, programming and testing of complex java applications
 
 All this in less then 30kB and no run-time overhead!
-[Download EasyFlow 1.1](http://datasymphony.com.au/?wpdmact=process&did=MS5ob3RsaW5r)
+[Download EasyFlow 1.3](http://datasymphony.com.au/?wpdmact=process&did=Ny5ob3RsaW5r)
 
 Here is a simple example illustrating how a state machine can be definded and implemented with **EasyFlow**
 
@@ -23,29 +25,29 @@ This is a State diargam fragment describing a simple ATM workflow
 With **EasyFlow** we can define the above state machine like this
 
 ```java
-EasyFlow<FlowContext> flow = FlowBuilder
+EasyFlow<FlowContext> flow =
 
-    .from(SHOWING_WELCOME).transit(
-        onCardPresent.to(WAITING_FOR_PIN).transit(
-            onPinProvided.to(...).transit(
+    from(SHOWING_WELCOME).transit(
+        on(cardPresent).to(WAITING_FOR_PIN).transit(
+            on(pinProvided).to(...).transit(
                 ...
             ),
-            onCancel.to(RETURNING_CARD).transit(
-                onCardExtracted.to(SHOWING_WELCOME)
+            on(cancel).to(RETURNING_CARD).transit(
+                on(cardExtracted).to(SHOWING_WELCOME)
             )
         )
     )
 ```
 then all what's left to do is to implement our state handlers like so
 ```java
-SHOWING_WELCOME.whenEnter(new StateHandler<FlowContext>() {
+whenEnter(SHOWING_WELCOME, new ContextHandler<FlowContext>() {
     @Override
-    public void call(State<FlowContext> state, final FlowContext context) throws Exception {
+    public void call(final FlowContext context) throws Exception {
         ...
         btnOption1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onCardPresent.trigger(context);
+                context.trigger(cardPresent);
             }
         });
         ...
@@ -64,7 +66,7 @@ To start using EasyFlow on your project, define Maven dependency like so
 <dependency>
     <groupId>au.com.datasymphony</groupId>
     <artifactId>EasyFlow</artifactId>
-    <version>1.2</version>
+    <version>1.3</version>
 </dependency>
 ```
 
