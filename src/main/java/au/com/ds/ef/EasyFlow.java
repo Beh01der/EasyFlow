@@ -5,6 +5,7 @@ import au.com.ds.ef.err.*;
 import com.google.common.base.*;
 import org.slf4j.*;
 
+import java.util.*;
 import java.util.concurrent.*;
 
 import static au.com.ds.ef.HandlerCollection.*;
@@ -125,39 +126,58 @@ public class EasyFlow<C extends StatefulContext> {
         return (EasyFlow<C1>) this;
     }
 
-    public void trigger(final EventEnum event, final C context) {
+    public boolean safeTrigger(final EventEnum event, final C context) {
+        try {
+            return trigger(event, true, context);
+        } catch (LogicViolationError logicViolationError) {
+            return false;
+        }
+    }
+
+    public void trigger(final EventEnum event, final C context) throws LogicViolationError {
+        trigger(event, false, context);
+    }
+
+    public List<Transition> getAvailableTransitions(StateEnum stateFrom) {
+        return transitions.getTransitions(stateFrom);
+    }
+
+    private boolean trigger(final EventEnum event, final boolean safe, final C context) throws LogicViolationError {
         if (context.isTerminated()) {
-            return;
+            return false;
         }
 
-        execute(new Runnable() {
-            @Override
-            public void run() {
-                StateEnum stateFrom = context.getState();
-                Optional<Transition> transition = transitions.getTransition(stateFrom, event);
+        final StateEnum stateFrom = context.getState();
+        final Optional<Transition> transition = transitions.getTransition(stateFrom, event);
 
-                try {
-                    if (transition.isPresent()) {
+        if (transition.isPresent()) {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
                         StateEnum stateTo = transition.get().getStateTo();
                         if (isTrace())
                             log.debug("when triggered {} in {} for {} <<<", event, stateFrom, context);
 
                         handlers.callOnEventTriggered(event, stateFrom, stateTo, context);
+                        context.setLastEvent(event);
 
                         if (isTrace())
                             log.debug("when triggered {} in {} for {} >>>", event, stateFrom, context);
 
                         setCurrentState(stateTo, false, context);
-                    } else {
-                        throw new LogicViolationError("Invalid Event: " + event +
-                            " triggered while in State: " + context.getState() + " for " + context);
+                    } catch (Exception e) {
+                        doOnError(new ExecutionError(stateFrom, event, e,
+                            "Execution Error in [trigger]", context));
                     }
-                } catch (Exception e) {
-                    doOnError(new ExecutionError(stateFrom, event, e,
-                        "Execution Error in [trigger]", context));
                 }
-            }
-        });
+            });
+        } else if (!safe){
+            throw new LogicViolationError("Invalid Event: " + event +
+                " triggered while in State: " + context.getState() + " for " + context);
+        }
+
+        return transition.isPresent();
     }
 
     private void enter(final StateEnum state, final C context) {

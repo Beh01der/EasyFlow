@@ -1,6 +1,9 @@
 package au.com.ds.ef;
 
+import au.com.ds.ef.err.*;
+
 import java.io.*;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 
@@ -12,6 +15,7 @@ public class StatefulContext implements Serializable {
 	private final String id;
     private EasyFlow flow;
 	private StateEnum state;
+    private EventEnum lastEvent;
 	private final AtomicBoolean terminated = new AtomicBoolean(false);
 	private final CountDownLatch completionLatch = new CountDownLatch(1);
 
@@ -54,7 +58,11 @@ public class StatefulContext implements Serializable {
 		return true;
 	}
 
-    public void trigger(EventEnum event) {
+    public boolean safeTrigger(EventEnum event) {
+        return flow.safeTrigger(event, this);
+    }
+
+    public void trigger(EventEnum event) throws LogicViolationError {
         flow.trigger(event, this);
     }
 
@@ -83,18 +91,26 @@ public class StatefulContext implements Serializable {
 		this.completionLatch.countDown();
 	}
 
-	/**
-	 * Block current thread until Context terminated
-	 */
-	protected void awaitTermination() {
-	  try {
-      this.completionLatch.await();
-    } 
-	  catch (InterruptedException e) {
-	    Thread.interrupted();
-	  }
-	}
-	
+    public EventEnum getLastEvent() {
+        return lastEvent;
+    }
+
+    void setLastEvent(EventEnum lastEvent) {
+        this.lastEvent = lastEvent;
+    }
+
+    public List<Transition> getAvailableTransitions() {
+        return flow.getAvailableTransitions(state);
+    }
+
+    protected void awaitTermination() {
+        try {
+            this.completionLatch.await();
+        } catch (InterruptedException e) {
+            Thread.interrupted();
+        }
+    }
+
     @Override
     public String toString() {
         return id;

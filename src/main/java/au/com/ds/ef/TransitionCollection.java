@@ -75,6 +75,10 @@ final class TransitionCollection {
             .firstMatch(new TransitionWithEvent(event));
     }
 
+    public List<Transition> getTransitions(StateEnum stateFrom) {
+        return Lists.newArrayList(transitionFromState.get(stateFrom));
+    }
+
     protected boolean isFinal(StateEnum state) {
         return finalStates.contains(state);
     }

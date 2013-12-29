@@ -80,7 +80,7 @@ public class RunSingleTest {
         flow
 		    .whenEnter(START, new ContextHandler<StatefulContext>() {
                 @Override
-                public void call(StatefulContext context) {
+                public void call(StatefulContext context) throws Exception {
                     actualOrder.add(1);
                     context.trigger(event_1);
                 }
@@ -94,7 +94,7 @@ public class RunSingleTest {
 
             .whenEnter(STATE_1, new ContextHandler<StatefulContext>() {
                 @Override
-                public void call(StatefulContext context) {
+                public void call(StatefulContext context) throws Exception {
                     actualOrder.add(3);
                     context.trigger(event_2);
                 }
