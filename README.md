@@ -3,6 +3,8 @@ EasyFlow
 by [DataSymphony.com.au](http://datasymphony.com.au/)
 
 EasyFlow 1.3 is out (12 Dec 2013)
+* refactored to use Java **enums** for states and events
+* added new example [ATM emulator - Console application](http://datasymphony.com.au/?wpdmact=process&did=OC5ob3RsaW5r)
 
 EasyFlow is a simple and lightweight Finite State Machine for Java
 
@@ -25,6 +27,14 @@ This is a State diargam fragment describing a simple ATM workflow
 With **EasyFlow** we can define the above state machine like this
 
 ```java
+enum States implements StateEnum {
+    SHOWING_WELCOME, WAITING_FOR_PIN, RETURNING_CARD, SHOWING_WELCOME, ...
+}
+
+enum Events implements EventEnum {
+    cardPresent, pinProvided, cardExtracted, cancel, ...
+}
+...
 EasyFlow<FlowContext> flow =
 
     from(SHOWING_WELCOME).transit(
@@ -36,7 +46,7 @@ EasyFlow<FlowContext> flow =
                 on(cardExtracted).to(SHOWING_WELCOME)
             )
         )
-    )
+    );
 ```
 then all what's left to do is to implement our state handlers like so
 ```java
@@ -59,7 +69,7 @@ and start the flow
 ```java
 flow.start(new FlowContext());
 ```
-See the [complete example](https://github.com/Beh01der/EasyFlow-example-AtmEmulator/blob/master/src/au/com/ds/ef/ae/AtmEmulator/MainActivity.java)
+See complete example [ATM emulator - Android application](https://github.com/Beh01der/EasyFlow-example-AtmEmulator/blob/master/src/au/com/ds/ef/ae/AtmEmulator/MainActivity.java)
 
 To start using EasyFlow on your project, define Maven dependency like so
 ```xml
