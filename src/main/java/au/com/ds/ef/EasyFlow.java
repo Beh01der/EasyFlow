@@ -78,7 +78,7 @@ public class EasyFlow<C extends StatefulContext> {
     }
 
     public <C1 extends StatefulContext> EasyFlow<C1> whenEvent(EventHandler<C1> onEvent) {
-        handlers.setHandler(EventType.EVENT_TRIGGER, null, null, onEvent);
+        handlers.setHandler(EventType.ANY_EVENT_TRIGGER, null, null, onEvent);
         return (EasyFlow<C1>) this;
     }
 
@@ -88,7 +88,7 @@ public class EasyFlow<C extends StatefulContext> {
     }
 
     public <C1 extends StatefulContext> EasyFlow<C1> whenEnter(StateHandler<C1> onEnter) {
-        handlers.setHandler(EventType.STATE_ENTER, null, null, onEnter);
+        handlers.setHandler(EventType.ANY_STATE_ENTER, null, null, onEnter);
         return (EasyFlow<C1>) this;
     }
 
@@ -98,7 +98,7 @@ public class EasyFlow<C extends StatefulContext> {
     }
 
     public <C1 extends StatefulContext> EasyFlow<C1> whenLeave(StateHandler<C1> onEnter) {
-        handlers.setHandler(EventType.STATE_LEAVE, null, null, onEnter);
+        handlers.setHandler(EventType.ANY_STATE_LEAVE, null, null, onEnter);
         return (EasyFlow<C1>) this;
     }
 
