@@ -3,7 +3,11 @@ package au.com.ds.ef;
 import au.com.ds.ef.call.*;
 import au.com.ds.ef.err.*;
 import com.google.common.collect.*;
+
+import junit.framework.*;
+
 import org.junit.*;
+import org.junit.Test;
 
 import java.util.*;
 
@@ -208,5 +212,64 @@ public class RunSingleTest {
             .start(ctx);
 
         assertEquals("Final state", STATE_3, ctx.getState());
+    }
+
+    @Test
+    public void testGlobalHandlers() {
+        EasyFlow<StatefulContext> flow =
+
+                from(START).transit(
+                        on(event_1).to(STATE_1).transit(
+                                on(event_3).to(START)
+                        ),
+                        on(event_2).to(STATE_2).transit(
+                                on(event_2).finish(STATE_3),
+                                on(event_1).finish(STATE_4)
+                        )
+                );
+
+        final boolean[] whenEnterCalled = {false};
+
+        flow.whenEnter(new StateHandler<StatefulContext>() {
+            @Override
+            public void call(StateEnum state, StatefulContext context) throws Exception {
+                whenEnterCalled[0] = true;
+            }
+        });
+
+        final boolean[] whenLeaveCalled = {false};
+
+        flow.whenLeave(new StateHandler<StatefulContext>() {
+            @Override
+            public void call(StateEnum state, StatefulContext context) throws Exception {
+                whenLeaveCalled[0] = true;
+            }
+        });
+
+        final boolean[] whenEventCalled = {false};
+
+        flow.whenEvent(new EventHandler<StatefulContext>() {
+            @Override
+            public void call(EventEnum event, StateEnum from, StateEnum to, StatefulContext context) throws Exception {
+                whenEventCalled[0] = true;
+            }
+        });
+
+        StatefulContext ctx = new StatefulContext();
+        flow
+                .executor(new SyncExecutor())
+                .trace()
+                .start(ctx);
+
+        try {
+            flow.trigger(event_1, ctx);
+        } catch (LogicViolationError logicViolationError) {
+            logicViolationError.printStackTrace();
+        }
+
+        assertTrue(whenEnterCalled[0]);
+        assertTrue(whenLeaveCalled[0]);
+        assertTrue(whenEventCalled[0]);
+
     }
 }
