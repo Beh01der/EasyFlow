@@ -1,22 +1,21 @@
 package au.com.ds.ef;
 
-import au.com.ds.ef.call.*;
-import au.com.ds.ef.err.*;
-import com.google.common.collect.*;
-
-import junit.framework.*;
-
-import org.junit.*;
+import au.com.ds.ef.call.ContextHandler;
+import au.com.ds.ef.call.EventHandler;
+import au.com.ds.ef.call.ExecutionErrorHandler;
+import au.com.ds.ef.call.StateHandler;
+import au.com.ds.ef.err.ExecutionError;
+import au.com.ds.ef.err.LogicViolationError;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import static au.com.ds.ef.FlowBuilder.*;
+import static au.com.ds.ef.FlowBuilder.from;
+import static au.com.ds.ef.FlowBuilder.on;
 import static au.com.ds.ef.RunSingleTest.Events.*;
 import static au.com.ds.ef.RunSingleTest.States.*;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 
 public class RunSingleTest {
     public enum States implements StateEnum {
@@ -79,7 +78,7 @@ public class RunSingleTest {
                 )
 		    );
 
-		final List<Integer> actualOrder = Lists.newArrayList();
+		final List<Integer> actualOrder = new ArrayList<Integer>();
 
         flow
 		    .whenEnter(START, new ContextHandler<StatefulContext>() {

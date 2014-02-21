@@ -1,10 +1,10 @@
 package au.com.ds.ef;
 
 import au.com.ds.ef.call.*;
-import au.com.ds.ef.err.*;
-import com.google.common.collect.*;
+import au.com.ds.ef.err.ExecutionError;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: andrey
@@ -57,7 +57,7 @@ class HandlerCollection {
         }
     }
 
-    private Map<HandlerType, Handler> handlers = Maps.newHashMap();
+    private Map<HandlerType, Handler> handlers = new HashMap<HandlerType, Handler>();
 
     public void setHandler(EventType eventType, StateEnum state, EventEnum event, Handler handler) {
         handlers.put(new HandlerType(eventType, event, state), handler);

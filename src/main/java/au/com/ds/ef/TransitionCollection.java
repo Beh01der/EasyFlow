@@ -1,8 +1,6 @@
 package au.com.ds.ef;
 
-import au.com.ds.ef.err.*;
-import com.google.common.base.*;
-import com.google.common.collect.*;
+import au.com.ds.ef.err.DefinitionError;
 
 import java.util.*;
 
@@ -12,26 +10,19 @@ import java.util.*;
  * Time: 2:08 PM
  */
 final class TransitionCollection {
-    private static final class TransitionWithEvent implements Predicate<Transition> {
-        private EventEnum event;
-
-        private TransitionWithEvent(EventEnum event) {
-            this.event = event;
-        }
-
-        @Override
-        public boolean apply(Transition transition) {
-            return transition.getEvent() == event;
-        }
-    }
-
-    private Multimap<StateEnum, Transition> transitionFromState = HashMultimap.create();
-    private Set<StateEnum> finalStates = Sets.newHashSet();
+    private Map<StateEnum, Map<EventEnum, Transition>> transitionFromState =
+        new HashMap<StateEnum, Map<EventEnum, Transition>>();
+    private Set<StateEnum> finalStates = new HashSet<StateEnum>();
 
     protected TransitionCollection(Collection<Transition> transitions, boolean validate) {
         if (transitions != null) {
             for (Transition transition : transitions) {
-                transitionFromState.put(transition.getStateFrom(), transition);
+                Map<EventEnum, Transition> map = transitionFromState.get(transition.getStateFrom());
+                if (map == null) {
+                    map = new HashMap<EventEnum, Transition>();
+                    transitionFromState.put(transition.getStateFrom(), map);
+                }
+                map.put(transition.getEvent(), transition);
                 if (transition.isFinal()) {
                     finalStates.add(transition.getStateTo());
                 }
@@ -43,7 +34,7 @@ final class TransitionCollection {
                 throw new DefinitionError("No transitions defined");
             }
 
-            Set<Transition> processedTransitions = Sets.newHashSet();
+            Set<Transition> processedTransitions = new HashSet<Transition>();
             for (Transition transition : transitions) {
                 StateEnum stateFrom = transition.getStateFrom();
                 if (finalStates.contains(stateFrom)) {
@@ -69,14 +60,14 @@ final class TransitionCollection {
         }
     }
 
-    public Optional<Transition> getTransition(StateEnum stateFrom, EventEnum event) {
-        return FluentIterable
-            .from(transitionFromState.get(stateFrom))
-            .firstMatch(new TransitionWithEvent(event));
+    public Transition getTransition(StateEnum stateFrom, EventEnum event) {
+        Map<EventEnum, Transition> transitionMap = transitionFromState.get(stateFrom);
+        return transitionMap == null ? null : transitionMap.get(event);
     }
 
     public List<Transition> getTransitions(StateEnum stateFrom) {
-        return Lists.newArrayList(transitionFromState.get(stateFrom));
+        Map<EventEnum, Transition> transitionMap = transitionFromState.get(stateFrom);
+        return transitionMap == null ? Collections.<Transition>emptyList() : new ArrayList<Transition>(transitionMap.values());
     }
 
     protected boolean isFinal(StateEnum state) {

@@ -1,18 +1,18 @@
 package au.com.ds.ef;
 
-import au.com.ds.ef.call.*;
-import au.com.ds.ef.err.*;
-import com.google.common.collect.Lists;
+import au.com.ds.ef.call.ContextHandler;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static au.com.ds.ef.FlowBuilder.from;
+import static au.com.ds.ef.FlowBuilder.on;
 import static au.com.ds.ef.JsonArrayParserTest.Events.*;
 import static au.com.ds.ef.JsonArrayParserTest.States.*;
-import static au.com.ds.ef.FlowBuilder.*;
+import static org.junit.Assert.*;
 
 /**
  * User: andrey
@@ -39,7 +39,7 @@ public class JsonArrayParserTest {
 
         public Item() {
             this.type = ItemType.LIST;
-            this.list = Lists.newArrayList();
+            this.list = new ArrayList<Item>();
         }
 
         public List<Item> getList() {
@@ -68,8 +68,8 @@ public class JsonArrayParserTest {
             this.json = json;
             this.position = -1;
             this.thisChar = 0;
-            this.stack = Lists.newLinkedList();
-            this.thisValue = Lists.newArrayList();
+            this.stack = new LinkedList<Item>();
+            this.thisValue = new ArrayList<Character>();
             this.startedValue = false;
         }
 
