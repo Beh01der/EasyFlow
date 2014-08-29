@@ -1,19 +1,28 @@
 package au.com.ds.ef;
 
-import au.com.ds.ef.call.*;
-import au.com.ds.ef.err.*;
-import com.google.common.collect.*;
-
-import junit.framework.*;
-
-import org.junit.*;
+import au.com.ds.ef.call.ContextHandler;
+import au.com.ds.ef.call.EventHandler;
+import au.com.ds.ef.call.ExecutionErrorHandler;
+import au.com.ds.ef.call.StateHandler;
+import au.com.ds.ef.err.ExecutionError;
+import au.com.ds.ef.err.LogicViolationError;
+import com.google.common.collect.Lists;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.List;
 
-import static au.com.ds.ef.FlowBuilder.*;
-import static au.com.ds.ef.RunSingleTest.Events.*;
-import static au.com.ds.ef.RunSingleTest.States.*;
+import static au.com.ds.ef.FlowBuilder.from;
+import static au.com.ds.ef.FlowBuilder.on;
+import static au.com.ds.ef.RunSingleTest.Events.event_1;
+import static au.com.ds.ef.RunSingleTest.Events.event_2;
+import static au.com.ds.ef.RunSingleTest.Events.event_3;
+import static au.com.ds.ef.RunSingleTest.Events.event_4;
+import static au.com.ds.ef.RunSingleTest.Events.event_5;
+import static au.com.ds.ef.RunSingleTest.States.START;
+import static au.com.ds.ef.RunSingleTest.States.STATE_1;
+import static au.com.ds.ef.RunSingleTest.States.STATE_2;
+import static au.com.ds.ef.RunSingleTest.States.STATE_3;
+import static au.com.ds.ef.RunSingleTest.States.STATE_4;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertTrue;

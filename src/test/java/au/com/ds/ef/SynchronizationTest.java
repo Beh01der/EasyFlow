@@ -1,14 +1,19 @@
 package au.com.ds.ef;
 
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
+import au.com.ds.ef.call.ContextHandler;
+import au.com.ds.ef.call.StateHandler;
 
-import au.com.ds.ef.call.*;
-import sun.management.resources.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static au.com.ds.ef.SynchronizationTest.Events.*;
-import static au.com.ds.ef.SynchronizationTest.States.*;
-import static au.com.ds.ef.FlowBuilder.*;
+import static au.com.ds.ef.FlowBuilder.from;
+import static au.com.ds.ef.FlowBuilder.on;
+import static au.com.ds.ef.SynchronizationTest.Events.initialize;
+import static au.com.ds.ef.SynchronizationTest.Events.terminate;
+import static au.com.ds.ef.SynchronizationTest.States.DONE;
+import static au.com.ds.ef.SynchronizationTest.States.RUNNING;
+import static au.com.ds.ef.SynchronizationTest.States.UNINITIALIZED;
 
 /**
  * With original synchronize()/notifyAll() approach this test never finishes
