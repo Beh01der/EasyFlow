@@ -5,7 +5,7 @@ import au.com.ds.ef.err.*;
 import com.google.common.base.*;
 import org.slf4j.*;
 
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.*;
 
 import static au.com.ds.ef.HandlerCollection.*;
