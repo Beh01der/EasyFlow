@@ -7,6 +7,7 @@ import au.com.ds.ef.call.StateHandler;
 import au.com.ds.ef.err.ExecutionError;
 import au.com.ds.ef.err.LogicViolationError;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -45,6 +46,10 @@ public class EasyFlow<C extends StatefulContext> {
         transitions = new TransitionCollection(Transition.consumeTransitions(), !skipValidation);
     }
 
+    protected void setTransitions(Collection<Transition> collection, boolean skipValidation) {
+        transitions = new TransitionCollection(collection, !skipValidation);
+    }
+
     private void prepare() {
         if (executor == null) {
             executor = new AsyncExecutor();
@@ -80,11 +85,13 @@ public class EasyFlow<C extends StatefulContext> {
                 context.setState(state);
                 enter(state, context);
             }
-        });
+        }, context);
     }
 
-    protected void execute(Runnable task) {
-        executor.execute(task);
+    protected void execute(Runnable task, final C context) {
+        if (!context.isTerminated()) {
+            executor.execute(task);
+        }
     }
 
     public <C1 extends StatefulContext> EasyFlow<C1> whenEvent(EventEnum event, ContextHandler<C1> onEvent) {
@@ -191,7 +198,7 @@ public class EasyFlow<C extends StatefulContext> {
                             "Execution Error in [trigger]", context));
                     }
                 }
-            });
+            }, context);
         } else if (!safe){
             throw new LogicViolationError("Invalid Event: " + event +
                 " triggered while in State: " + context.getState() + " for " + context);

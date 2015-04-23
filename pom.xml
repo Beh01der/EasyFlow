@@ -42,7 +42,7 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
-            <plugin>
+<!--            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
                 <executions>
@@ -63,6 +63,7 @@
                     <mavenExecutorId>forked-path</mavenExecutorId>
                 </configuration>
             </plugin>
+-->            
         </plugins>
 	</build>
 

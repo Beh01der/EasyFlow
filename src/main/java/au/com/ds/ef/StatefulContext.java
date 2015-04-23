@@ -17,6 +17,7 @@ public class StatefulContext implements Serializable {
 	private StateEnum state;
     private EventEnum lastEvent;
 	private final AtomicBoolean terminated = new AtomicBoolean(false);
+	private final AtomicBoolean stopped = new AtomicBoolean(false);
 	private final CountDownLatch completionLatch = new CountDownLatch(1);
 
 	public StatefulContext() {
@@ -57,6 +58,15 @@ public class StatefulContext implements Serializable {
 			return false;
 		return true;
 	}
+
+    public void stop() {
+        stopped.set(true);
+        setTerminated();
+    }
+
+    public boolean isStopped() {
+        return stopped.get();
+    }
 
     public boolean safeTrigger(EventEnum event) {
         return flow.safeTrigger(event, this);

@@ -1,5 +1,7 @@
 package au.com.ds.ef;
 
+import java.util.Collection;
+
 public class FlowBuilder<C extends StatefulContext> {
 	private EasyFlow<C> flow;
 
@@ -26,6 +28,13 @@ public class FlowBuilder<C extends StatefulContext> {
 	public static <C extends StatefulContext> FlowBuilder<C> from(StateEnum startState) {
 		return new FlowBuilder<C>(startState);
 	}
+
+	public static <C extends StatefulContext> EasyFlow<C> fromTransitions(StateEnum startState,
+                                                                          Collection<Transition> transitions, boolean skipValidation) {
+        EasyFlow<C> flow = new EasyFlow<C>(startState);
+        flow.setTransitions(transitions, skipValidation);
+        return flow;
+    }
 
     public static ToHolder on(EventEnum event) {
         return new ToHolder(event);
