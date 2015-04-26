@@ -12,9 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static au.com.ds.ef.FlowBuilder.from;
+import static au.com.ds.ef.FlowBuilder.fromTransitions;
 import static au.com.ds.ef.FlowBuilder.on;
 import static au.com.ds.ef.RunSingleTest.Events.*;
 import static au.com.ds.ef.RunSingleTest.States.*;
+import static java.util.Arrays.asList;
 import static junit.framework.TestCase.*;
 
 public class RunSingleTest {
@@ -139,6 +141,86 @@ public class RunSingleTest {
 			}
 		}
 	}
+
+
+	@Test
+	public void testEventsOrderTransitionCollection() throws LogicViolationError {
+        List<Transition> transitions = asList(
+                new Transition(event_1, START, STATE_1),
+                new Transition(event_2, STATE_1, STATE_2, true),
+                new Transition(event_3, STATE_1, STATE_3),
+                new Transition(event_4, STATE_3, STATE_1),
+                new Transition(event_5, STATE_3, STATE_4, true)
+        );
+
+        EasyFlow<StatefulContext> flow = fromTransitions(START, transitions, false);
+
+        final List<Integer> actualOrder = new ArrayList<Integer>();
+
+        flow
+                .whenEnter(START, new ContextHandler<StatefulContext>() {
+                    @Override
+                    public void call(StatefulContext context) throws Exception {
+                        actualOrder.add(1);
+                        context.trigger(event_1);
+                    }
+                })
+
+                .whenLeave(START, new ContextHandler<StatefulContext>() {
+                    @Override
+                    public void call(StatefulContext context) {
+                        actualOrder.add(2);
+                    }
+                })
+
+                .whenEnter(STATE_1, new ContextHandler<StatefulContext>() {
+                    @Override
+                    public void call(StatefulContext context) throws Exception {
+                        actualOrder.add(3);
+                        context.trigger(event_2);
+                    }
+                })
+
+                .whenLeave(STATE_1, new ContextHandler<StatefulContext>() {
+                    @Override
+                    public void call(StatefulContext context) {
+                        actualOrder.add(4);
+                    }
+                })
+
+                .whenEnter(STATE_2, new ContextHandler<StatefulContext>() {
+                    @Override
+                    public void call(StatefulContext context) {
+                        actualOrder.add(5);
+                    }
+                })
+
+                .whenLeave(STATE_2, new ContextHandler<StatefulContext>() {
+                    @Override
+                    public void call(StatefulContext context) {
+                        throw new RuntimeException("It never leaves the final state");
+                    }
+                })
+
+                .whenFinalState(new StateHandler<StatefulContext>() {
+                    @Override
+                    public void call(StateEnum state, StatefulContext context) {
+                        actualOrder.add(6);
+                    }
+                });
+
+        StatefulContext ctx = new StatefulContext();
+        flow.trace().start(ctx);
+        ctx.awaitTermination();
+
+        int i = 0;
+        for (Integer order : actualOrder) {
+            i++;
+            if (order != i) {
+                throw new RuntimeException("Events called not in order expected: " + i + " actual: " + order);
+            }
+        }
+    }
 
     @Test
     public void testEventReuse() {

@@ -18,7 +18,14 @@ public final class Transition {
         this.event = event;
         this.stateFrom = stateFrom;
         this.stateTo = stateTo;
-        this.isFinal = stateTo == null;
+        this.isFinal = false;
+    }
+
+    public Transition(EventEnum event, StateEnum stateFrom, StateEnum stateTo, boolean isFinal) {
+        this.event = event;
+        this.stateFrom = stateFrom;
+        this.stateTo = stateTo;
+        this.isFinal = isFinal;
     }
 
     protected Transition(EventEnum event, StateEnum stateTo, boolean isFinal) {
