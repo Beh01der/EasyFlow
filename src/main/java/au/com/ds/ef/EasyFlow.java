@@ -169,6 +169,13 @@ public class EasyFlow<C extends StatefulContext> {
         return transitions.getTransitions(stateFrom);
     }
 
+    public boolean isEventHandledByState(final StateEnum state, final EventEnum event) {
+        for (Transition transition : transitions.getTransitions(state)) {
+            if (transition.getEvent() == event) return true;
+        }
+        return false;
+    }
+
     private boolean trigger(final EventEnum event, final boolean safe, final C context) throws LogicViolationError {
         if (context.isTerminated()) {
             return false;

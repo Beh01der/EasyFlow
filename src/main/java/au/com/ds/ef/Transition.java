@@ -44,7 +44,7 @@ public final class Transition {
         list.add(transition);
     }
 
-    protected EventEnum getEvent() {
+    public EventEnum getEvent() {
         return event;
     }
 
@@ -52,15 +52,15 @@ public final class Transition {
         this.stateFrom = stateFrom;
     }
 
-    protected StateEnum getStateFrom() {
+    public StateEnum getStateFrom() {
         return stateFrom;
     }
 
-    protected StateEnum getStateTo() {
+    public StateEnum getStateTo() {
         return stateTo;
     }
 
-    protected boolean isFinal() {
+    public boolean isFinal() {
         return isFinal;
     }
 
