@@ -80,4 +80,8 @@ To start using EasyFlow on your project, define Maven dependency like so
 </dependency>
 ```
 
+## See also
+[EasyFlow for Node.js](https://github.com/Beh01der/node-easy-flow)
+
+
 License [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
