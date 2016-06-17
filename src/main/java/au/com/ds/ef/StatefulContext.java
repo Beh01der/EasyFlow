@@ -117,7 +117,7 @@ public class StatefulContext implements Serializable {
         try {
             this.completionLatch.await();
         } catch (InterruptedException e) {
-            Thread.interrupted();
+            Thread.currentThread().interrupt();
         }
     }
 
