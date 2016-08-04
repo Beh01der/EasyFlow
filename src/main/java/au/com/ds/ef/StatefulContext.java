@@ -80,8 +80,8 @@ public class StatefulContext implements Serializable {
         this.flow = flow;
     }
 	
-	protected long newId() {
-		return idCounter++;
+	protected String newId() {
+		return Long.toString(idCounter++);
 	}
 
     public boolean isTerminated() {
