@@ -189,7 +189,7 @@ public class JsonArrayParserTest {
                     on(contentValid).finish(DONE),
                     on(contentInvalid).finish(ERROR)
                 )
-            );
+            ).build();
 
         flow
             .executor(new SyncExecutor())

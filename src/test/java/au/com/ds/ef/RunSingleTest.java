@@ -39,7 +39,7 @@ public class RunSingleTest {
                 on(event_1).to(STATE_1).transit(
                     on(event_2).finish(STATE_2)
                 )
-            );
+            ).build();
 
         // handlers definition
         flow
@@ -78,7 +78,7 @@ public class RunSingleTest {
                         on(event_5).finish(STATE_4)
                     )
                 )
-		    );
+		    ).build();
 
 		final List<Integer> actualOrder = new ArrayList<Integer>();
 
@@ -234,7 +234,7 @@ public class RunSingleTest {
                     on(event_2).finish(STATE_3),
                     on(event_1).finish(STATE_4)
                 )
-            );
+            ).build();
 
         flow
             .whenEnter(START, new ContextHandler<StatefulContext>() {
@@ -269,7 +269,7 @@ public class RunSingleTest {
                     on(event_2).finish(STATE_3),
                     on(event_1).finish(STATE_4)
                 )
-            );
+            ).build();
 
         flow
             .whenEnter(START, new ContextHandler<StatefulContext>() {
@@ -307,7 +307,7 @@ public class RunSingleTest {
                                 on(event_2).finish(STATE_3),
                                 on(event_1).finish(STATE_4)
                         )
-                );
+                ).build();
 
         final boolean[] whenEnterCalled = {false};
 

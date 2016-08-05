@@ -18,7 +18,7 @@ public class ValidationTest {
 	@Test(expected = DefinitionError.class)
     // no transitions defined
 	public void testLooseEnd1() {
-		from(START).transit();
+		from(START).transit().build();
 	}
 	
 	@Test(expected = DefinitionError.class)
@@ -26,7 +26,7 @@ public class ValidationTest {
 	public void testLooseEnd2() {
 		from(START).transit(
 			on(event_1).to(STATE_1)
-		);
+		).build();
 	}
 	
 	@Test(expected = DefinitionError.class)
@@ -34,7 +34,7 @@ public class ValidationTest {
 	public void testLooseEnd3() {
 		from(START).transit(
 			on(event_1).to(STATE_1).transit()
-		);
+		).build();
 	}
 	
 	@Test(expected = DefinitionError.class)
@@ -44,7 +44,7 @@ public class ValidationTest {
 			on(event_1).finish(STATE_1).transit(
 				on(event_2).to(STATE_2)
 			)
-		);
+		).build();
 	}
 	
 	@Test
@@ -67,7 +67,7 @@ public class ValidationTest {
             on(event_1).to(STATE_2).transit(
                 on(event_3).finish(STATE_3)
             )
-		);
+		).build();
 	}
 
 	@Test(expected = DefinitionError.class)
@@ -79,7 +79,7 @@ public class ValidationTest {
             on(event_1).to(STATE_1).transit(
                 on(event_3).finish(STATE_3)
             )
-		);
+		).build();
 	}
 
 	@Test(expected = DefinitionError.class)
@@ -87,7 +87,7 @@ public class ValidationTest {
 		from(START).transit(
 			on(event_1).to(START),
             on(event_2).finish(STATE_2)
-		);
+		).build();
 	}
 	
 	@Test
