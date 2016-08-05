@@ -1,11 +1,13 @@
 package au.com.ds.ef;
 
 import java.util.Collection;
+import java.util.concurrent.Executor;
 
 public class FlowBuilder<C extends StatefulContext> {
 
     private StateEnum startState;
     private boolean skipValidation;
+    private Executor executor;
 
     public static class ToHolder {
         private EventEnum event;
@@ -54,9 +56,14 @@ public class FlowBuilder<C extends StatefulContext> {
         return this;
 	}
 
+    public void setExecutor(Executor executor) {
+        this.executor = executor;
+    }
+
     public <C1 extends StatefulContext> EasyFlow<C1> build() {
         EasyFlow<C1> flow = new EasyFlow<C1>(startState);
         flow.processAllTransitions(skipValidation);
+        if (executor != null) flow.executor(executor);
         return flow;
     }
 }
