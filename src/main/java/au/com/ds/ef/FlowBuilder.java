@@ -56,8 +56,9 @@ public class FlowBuilder<C extends StatefulContext> {
         return this;
 	}
 
-    public void setExecutor(Executor executor) {
+    public FlowBuilder<C> setExecutor(Executor executor) {
         this.executor = executor;
+        return this;
     }
 
     public <C1 extends StatefulContext> EasyFlow<C1> build() {
