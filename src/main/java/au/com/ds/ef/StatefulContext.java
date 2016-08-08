@@ -79,6 +79,10 @@ public class StatefulContext implements Serializable {
     protected void setFlow(EasyFlow<? extends StatefulContext> flow) {
         this.flow = flow;
     }
+
+    protected EasyFlow getFlow() {
+        return flow;
+    }
 	
 	protected String newId() {
 		return Long.toString(idCounter++);

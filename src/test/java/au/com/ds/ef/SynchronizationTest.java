@@ -53,7 +53,7 @@ public class SynchronizationTest {
                     on(initialize).to(RUNNING).transit(
                         on(terminate).finish(DONE)
                     )
-                );
+                ).build();
 
             flow
                 .whenEnter(UNINITIALIZED, new ContextHandler<StatefulContext>() {

@@ -1,9 +1,13 @@
 package au.com.ds.ef;
 
 import java.util.Collection;
+import java.util.concurrent.Executor;
 
 public class FlowBuilder<C extends StatefulContext> {
-	private EasyFlow<C> flow;
+
+    private StateEnum startState;
+    private boolean skipValidation;
+    private Executor executor;
 
     public static class ToHolder {
         private EventEnum event;
@@ -22,7 +26,7 @@ public class FlowBuilder<C extends StatefulContext> {
     }
 
 	private FlowBuilder(StateEnum startState) {
-        flow = new EasyFlow<C>(startState);
+        this.startState = startState;
 	}
 
 	public static <C extends StatefulContext> FlowBuilder<C> from(StateEnum startState) {
@@ -40,16 +44,27 @@ public class FlowBuilder<C extends StatefulContext> {
         return new ToHolder(event);
     }
 
-    public <C1 extends StatefulContext> EasyFlow<C1> transit(Transition... transitions) {
+    public FlowBuilder<C> transit(Transition... transitions) {
         return transit(false, transitions);
     }
 
-	public <C1 extends StatefulContext> EasyFlow<C1> transit(boolean skipValidation, Transition... transitions) {
+	public FlowBuilder<C> transit(boolean skipValidation, Transition... transitions) {
         for (Transition transition : transitions) {
-            transition.setStateFrom(flow.getStartState());
+            transition.setStateFrom(startState);
         }
-		flow.processAllTransitions(skipValidation);
-
-        return (EasyFlow<C1>) flow;
+        this.skipValidation = skipValidation;
+        return this;
 	}
+
+    public FlowBuilder<C> setExecutor(Executor executor) {
+        this.executor = executor;
+        return this;
+    }
+
+    public <C1 extends StatefulContext> EasyFlow<C1> build() {
+        EasyFlow<C1> flow = new EasyFlow<C1>(startState);
+        flow.processAllTransitions(skipValidation);
+        if (executor != null) flow.executor(executor);
+        return flow;
+    }
 }
