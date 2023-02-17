@@ -1,10 +1,9 @@
 EasyFlow
 ========
-by [DataSymphony.com.au](http://datasymphony.com.au/)
 
 EasyFlow 1.3 is out (12 Dec 2013)
 * refactored to use Java **enums** for states and events
-* added new example [ATM emulator - Console application](http://datasymphony.com.au/?wpdmact=process&did=OC5ob3RsaW5r)
+* added new example
 
 EasyFlow is a simple and lightweight Finite State Machine for Java
 
@@ -16,13 +15,10 @@ With **EasyFlow** you can:
 * simplify design, programming and testing of complex java applications
 
 All this in less then 30kB and no run-time overhead!
-[Download EasyFlow 1.3](http://datasymphony.com.au/?wpdmact=process&did=Ny5ob3RsaW5r)
 
 Here is a simple example illustrating how a state machine can be definded and implemented with **EasyFlow**
 
 This is a State diargam fragment describing a simple ATM workflow
-
-![State diagram fragment](http://datasymphony.com.au/wp-content/uploads/2013/04/atm_example.png)
 
 With **EasyFlow** we can define the above state machine like this
 
